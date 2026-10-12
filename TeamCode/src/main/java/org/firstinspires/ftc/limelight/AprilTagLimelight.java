@@ -4,14 +4,19 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
+@TeleOp(name = "LLtest", group = "StarterBot")
 public class AprilTagLimelight extends OpMode {
     private Limelight3A limelight;
     private IMU imu;
+    private double CameraHeight = 15.132; //inches
+    private double GoalHeight = 54; //inches
+    private double CameraAngle = 32.2; //angle A
 
     @Override
     public void init() {
@@ -38,8 +43,16 @@ public class AprilTagLimelight extends OpMode {
             telemetry.addData("Tx", llResult.getTx());
             telemetry.addData("Ty", llResult.getTy());
             telemetry.addData("Ta", llResult.getTa());
+            telemetry.addData("DirectDistance", getDirectDistance());
 
         }
 
+    }
+
+    public double getDirectDistance(double ty){
+        double heightDifference = GoalHeight - CameraHeight;
+        double angleInDegrees = CameraAngle + ty;
+
+        return heightDifference / Math.sin(Math.toRadians(angleInDegrees));
     }
 }
