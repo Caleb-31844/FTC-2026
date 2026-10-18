@@ -18,6 +18,7 @@ public class AprilTagLimelight extends OpMode {
     private double GoalHeight = 54; //inches
     private double CameraAngle = 32.2; //angle A
 
+
     @Override
     public void init() {
         limelight = hardwareMap.get(Limelight3A.class,"limelight");
@@ -43,9 +44,12 @@ public class AprilTagLimelight extends OpMode {
             telemetry.addData("Tx", llResult.getTx());
             telemetry.addData("Ty", llResult.getTy());
             telemetry.addData("Ta", llResult.getTa());
-            telemetry.addData("DirectDistance", getDirectDistance());
+            telemetry.addData("DirectDistance", getDirectDistance(llResult.getTy()));
+            telemetry.addData("HorizontalDistance", getHorizontalDistance(llResult.getTy()));
 
-        }
+        } else {
+            telemetry.addData("No valid target", "Nope");
+      }
 
     }
 
@@ -54,5 +58,11 @@ public class AprilTagLimelight extends OpMode {
         double angleInDegrees = CameraAngle + ty;
 
         return heightDifference / Math.sin(Math.toRadians(angleInDegrees));
+    }
+    public double getHorizontalDistance(double ty){
+        double heightDifference = GoalHeight - CameraHeight;
+        double angleInDegrees = CameraAngle + ty;
+
+        return heightDifference / Math.tan(Math.toRadians(angleInDegrees));
     }
 }
