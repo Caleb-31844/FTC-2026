@@ -58,7 +58,7 @@ public class BioBuzzStarterbotTeleop extends OpMode {
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
     private DcMotorEx launcher = null;
-    private DcMotor intake = null;
+    private DcMotorEx intake = null;
     private CRServo leftIntakeServo = null;
     private CRServo rightIntakeServo = null;
     private CRServo windmillServo = null;
@@ -73,8 +73,8 @@ public class BioBuzzStarterbotTeleop extends OpMode {
      * in the launch() function to only run the windmill servo when the motor is spinning fast
      * enough to make a successful throw.
      */
-    public final int LAUNCHER_TARGET_VELOCITY = 1250;
-    public final int LAUNCHER_MIN_VELOCITY = 1200;
+    public final int LAUNCHER_TARGET_VELOCITY = 1550;
+    public final int LAUNCHER_MIN_VELOCITY = 1500;
 
     /*
      * These two variables store the power we need to apply to the motors. In other cases, we may
@@ -98,13 +98,13 @@ public class BioBuzzStarterbotTeleop extends OpMode {
          * to 'get' must correspond to the names assigned during the robot configuration
          * step.
          */
-        leftDrive = hardwareMap.get(DcMotor.class, "left_drive");
-        rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
-        intake = hardwareMap.get(DcMotor.class, "intake");
+        leftDrive = hardwareMap.get(DcMotor.class, "ld");
+        rightDrive = hardwareMap.get(DcMotor.class, "rd");
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         windmillServo = hardwareMap.get(CRServo.class, "windmill");
-        leftIntakeServo = hardwareMap.get(CRServo.class, "left_intake_servo");
-        rightIntakeServo = hardwareMap.get(CRServo.class, "right_intake_servo");
+        leftIntakeServo = hardwareMap.get(CRServo.class, "l_servo");
+        rightIntakeServo = hardwareMap.get(CRServo.class, "r_servo");
 
         /*
          * To drive forward, most robots need the motor on one side to be reversed,
@@ -115,6 +115,7 @@ public class BioBuzzStarterbotTeleop extends OpMode {
          */
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        intake.setDirection(DcMotorSimple.Direction.FORWARD);
 
         /*
          * Setting zeroPowerBehavior to BRAKE enables a "brake mode". This causes the motor to
@@ -199,6 +200,12 @@ public class BioBuzzStarterbotTeleop extends OpMode {
          * create erratic behavior.
          */
         intakePower = gamepad1.right_trigger - gamepad1.left_trigger;
+        if(gamepad1.y){
+            intake.setVelocity(1000);
+        }
+        else if (gamepad1.x){
+            intake.setVelocity(0);
+        }
 
         /*
          * The launch() function handles setting motor velocity, and running the windmill servo
@@ -213,7 +220,6 @@ public class BioBuzzStarterbotTeleop extends OpMode {
          * change the intake power. So we need to give our launch function a chance to modify the
          * variable before we write it to our motor and servos.
          */
-        intake.setPower(intakePower);
         leftIntakeServo.setPower(intakePower);
         rightIntakeServo.setPower(intakePower);
 
