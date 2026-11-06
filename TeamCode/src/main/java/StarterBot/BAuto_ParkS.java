@@ -23,6 +23,10 @@ public class BAuto_ParkS extends LinearOpMode {
     double leftDrivePower = 0;
     double rightDrivePower = 0;
     final double STOP_SPEED = 0;
+    final double ticksPerRev = ((1+(46/17)) * (1+(46/11)) * 28);
+    final double inchesPerRev = 11.873736; //96 * pi (mm -> inches)
+    final double ticksPerInch = ticksPerRev/inchesPerRev;
+    final double ninetyDegrees = (17 * 3.14159) /4;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -44,10 +48,15 @@ public class BAuto_ParkS extends LinearOpMode {
         rightDrive.setZeroPowerBehavior(BRAKE);
         intake.setZeroPowerBehavior(BRAKE);
 
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         //DcMotorEX stuff
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(40, 0, 0, 12.5));
 
         //CRServo power + direction
         leftIntakeServo.setPower(0);
@@ -59,24 +68,38 @@ public class BAuto_ParkS extends LinearOpMode {
         telemetry.addLine("All Set :)");
 
         waitForStart();
-        sleep(1000);
+//        sleep(1000);
 
-        moveForward(0.5);
+        moveForward(24);
+//        leftDrive.setPower(0);
+//        rightDrive.setPower(0);
         sleep(500);
-        moveForward(STOP_SPEED);
-        sleep(250);
-        moveForward(-0.5);
-        sleep(500);
-        moveForward(STOP_SPEED);
+    //        rotateRight(360);
+    //        leftDrive.setPower(0);
+    //        rightDrive.setPower(0);
 
     }
-    public void moveForward(double speed){
-        leftDrivePower = speed;
-        rightDrivePower = speed;
+    public void moveForward(int inches){
+        int moveInches = Math.toIntExact(Math.round(ticksPerInch * inches));
+
+        leftDrive.setTargetPosition(moveInches);
+        rightDrive.setTargetPosition(moveInches);
+
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftDrive.setPower(.5);
+        rightDrive.setPower(.5);
     }
-    public void rotateRight(double speed){
-        leftDrivePower = speed;
-        rightDrivePower = -speed;
+    public void rotateRight(int moveDegrees){
+        int degreesTurned = (Math.toIntExact(Math.round(ninetyDegrees/90) * moveDegrees));
+
+        leftDrive.setTargetPosition(degreesTurned);
+        rightDrive.setTargetPosition(-degreesTurned);
+
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftDrive.setPower(.5);
+        rightDrive.setPower(.5);
     }
 
 }
