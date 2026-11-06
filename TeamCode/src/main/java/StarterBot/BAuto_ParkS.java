@@ -26,7 +26,7 @@ public class BAuto_ParkS extends LinearOpMode {
     final double ticksPerRev = ((1+(46/17)) * (1+(46/11)) * 28);
     final double inchesPerRev = 11.873736; //96 * pi (mm -> inches)
     final double ticksPerInch = ticksPerRev/inchesPerRev;
-    final double ninetyDegrees = (17 * 3.14159) /4;
+    final double TRACK_WIDTH = 16*(1.3); //1.3 is correction based on experiment
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -57,7 +57,6 @@ public class BAuto_ParkS extends LinearOpMode {
         //DcMotorEX stuff
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-
         //CRServo power + direction
         leftIntakeServo.setPower(0);
         rightIntakeServo.setPower(0);
@@ -68,38 +67,61 @@ public class BAuto_ParkS extends LinearOpMode {
         telemetry.addLine("All Set :)");
 
         waitForStart();
-//        sleep(1000);
 
         moveForward(24);
-//        leftDrive.setPower(0);
-//        rightDrive.setPower(0);
         sleep(500);
-    //        rotateRight(360);
-    //        leftDrive.setPower(0);
-    //        rightDrive.setPower(0);
+        rotateRight(360);
 
     }
-    public void moveForward(int inches){
-        int moveInches = Math.toIntExact(Math.round(ticksPerInch * inches));
+    public void moveForward(double inches) {
 
-        leftDrive.setTargetPosition(moveInches);
-        rightDrive.setTargetPosition(moveInches);
+        int moveInches = (int) Math.round(ticksPerInch * inches);
+        leftDrive.setTargetPosition(leftDrive.getCurrentPosition() + moveInches);
+        rightDrive.setTargetPosition(rightDrive.getCurrentPosition() + moveInches);
 
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftDrive.setPower(.5);
-        rightDrive.setPower(.5);
-    }
-    public void rotateRight(int moveDegrees){
-        int degreesTurned = (Math.toIntExact(Math.round(ninetyDegrees/90) * moveDegrees));
 
-        leftDrive.setTargetPosition(degreesTurned);
-        rightDrive.setTargetPosition(-degreesTurned);
+        leftDrive.setPower(0.5);
+        rightDrive.setPower(0.5);
+
+        while (opModeIsActive() &&
+                (leftDrive.isBusy() || rightDrive.isBusy())) {
+
+            telemetry.addData("Left Position", leftDrive.getCurrentPosition());
+            telemetry.addData("Right Position", rightDrive.getCurrentPosition());
+            telemetry.update();
+        }
+
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void rotateRight(int moveDegrees) {
+        double turningDistance = Math.PI * TRACK_WIDTH * moveDegrees / 360.0;
+        int degreesTurned = (int) Math.round(ticksPerInch * turningDistance);
+
+        leftDrive.setTargetPosition(leftDrive.getCurrentPosition() + degreesTurned);
+        rightDrive.setTargetPosition(rightDrive.getCurrentPosition() - degreesTurned);
 
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftDrive.setPower(.5);
-        rightDrive.setPower(.5);
+
+        leftDrive.setPower(0.5);
+        rightDrive.setPower(0.5);
+
+        while (opModeIsActive() &&
+                (leftDrive.isBusy() || rightDrive.isBusy())) {
+        }
+
+        leftDrive.setPower(0);
+        rightDrive.setPower(0);
+
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
 }
