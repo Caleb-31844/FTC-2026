@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-@Autonomous(name = "BAuto_Park", group = "StarterBot")
+@Autonomous(name = "BAuto_ParkS", group = "StarterBot")
 public class BAuto_ParkS extends LinearOpMode {
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
@@ -68,18 +68,25 @@ public class BAuto_ParkS extends LinearOpMode {
         telemetry.addLine("All Set :)");
 
         waitForStart();
-//        sleep(1000);
+        if (opModeIsActive()) {
+            //Use sleep only to give the robot time to stabilize
+            moveForward(24);
+            sleep(250);
+            rotateRight(-90);
+            sleep(250);
+            moveForward(72);
+            sleep(250);
+            rotateRight(90);
+            moveForward(-24);
+        }
 
-        moveForward(24);
-//        leftDrive.setPower(0);
-//        rightDrive.setPower(0);
-        sleep(500);
-    //        rotateRight(360);
-    //        leftDrive.setPower(0);
-    //        rightDrive.setPower(0);
 
     }
     public void moveForward(int inches){
+        //Reset encoders so we can use relative units
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         int moveInches = Math.toIntExact(Math.round(ticksPerInch * inches));
 
         leftDrive.setTargetPosition(moveInches);
@@ -87,11 +94,25 @@ public class BAuto_ParkS extends LinearOpMode {
 
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         leftDrive.setPower(.5);
         rightDrive.setPower(.5);
+        while (opModeIsActive() && (leftDrive.isBusy() || rightDrive.isBusy())){
+            telemetry.addData("Target Ticks:", moveInches);
+            telemetry.addData("Left Current", leftDrive.getCurrentPosition());
+            telemetry.addData("Right Current", rightDrive.getCurrentPosition());
+            telemetry.update();
+        }
+
+        //Stop the motors after breaking out of the while() loop
+        leftDrive.setPower(STOP_SPEED);
+        rightDrive.setPower(STOP_SPEED);
     }
     public void rotateRight(int moveDegrees){
-        int degreesTurned = (Math.toIntExact(Math.round(ninetyDegrees/90) * moveDegrees));
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        int degreesTurned = (Math.toIntExact(Math.round(ninetyDegrees/90.0) * moveDegrees));
 
         leftDrive.setTargetPosition(degreesTurned);
         rightDrive.setTargetPosition(-degreesTurned);
@@ -100,6 +121,15 @@ public class BAuto_ParkS extends LinearOpMode {
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftDrive.setPower(.5);
         rightDrive.setPower(.5);
+        while (opModeIsActive() && (leftDrive.isBusy() || rightDrive.isBusy())) {
+            telemetry.addData("Target Ticks:", degreesTurned);
+            telemetry.addData("Left Current", leftDrive.getCurrentPosition());
+            telemetry.addData("Right Current", rightDrive.getCurrentPosition());
+            telemetry.update();
+        }
+
+        leftDrive.setPower(STOP_SPEED);
+        rightDrive.setPower(STOP_SPEED);
     }
 
 }
